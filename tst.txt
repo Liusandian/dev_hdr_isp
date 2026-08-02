@@ -1,0 +1,1 @@
+HDR-ISP-main\thirdparty\easybmp\sample\EasyBMPsample.cpp;HDR-ISP-main\thirdparty\easylog; HDR-ISP-main\parse.cpp,开3个独立的agent ，给这3部分的代码或者文件夹路径的代码关键位置加上中文注释。然后开第四个agent帮我push到远程的local代码仓
