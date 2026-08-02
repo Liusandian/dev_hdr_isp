@@ -662,66 +662,64 @@ class LevelHelper : base::StaticClass {
   /// @param fn 对每个级别应用的函数。此bool表示是否停止遍历级别
   static void forEachLevel(base::type::EnumType* startIndex, const std::function<bool(void)>& fn);
 };
-/// @brief Represents enumeration of ConfigurationType used to configure or access certain aspect
-/// of logging
+/// @brief 配置类型枚举，用于配置或访问日志记录的某些方面
 enum class ConfigurationType : base::type::EnumType {
-  /// @brief Determines whether or not corresponding level and logger of logging is enabled
-  /// You may disable all logs by using el::Level::Global
+  /// @brief 确定是否启用相应的级别和日志记录器
+  /// 您可以使用el::Level::Global禁用所有日志
   Enabled = 1,
-  /// @brief Whether or not to write corresponding log to log file
+  /// @brief 是否将相应的日志写入日志文件
   ToFile = 2,
-  /// @brief Whether or not to write corresponding level and logger log to standard output.
-  /// By standard output meaning termnal, command prompt etc
+  /// @brief 是否将相应的级别和日志记录器日志写入标准输出
+  /// 标准输出意味着终端、命令提示符等
   ToStandardOutput = 4,
-  /// @brief Determines format of logging corresponding level and logger.
+  /// @brief 确定相应级别和日志记录器的日志格式
   Format = 8,
-  /// @brief Determines log file (full path) to write logs to for corresponding level and logger
+  /// @brief 确定用于为相应级别和日志记录器写入日志的日志文件（完整路径）
   Filename = 16,
-  /// @brief Specifies precision of the subsecond part. It should be within range (1-6).
+  /// @brief 指定亚秒部分的精度。它应该在范围(1-6)内
   SubsecondPrecision = 32,
-  /// @brief Alias of SubsecondPrecision (for backward compatibility)
+  /// @brief SubsecondPrecision的别名（用于向后兼容）
   MillisecondsWidth = SubsecondPrecision,
-  /// @brief Determines whether or not performance tracking is enabled.
+  /// @brief 确定是否启用性能跟踪
   ///
-  /// @detail This does not depend on logger or level. Performance tracking always uses 'performance' logger
+  /// @detail 这不依赖于日志记录器或级别。性能跟踪始终使用'performance'日志记录器
   PerformanceTracking = 64,
-  /// @brief Specifies log file max size.
+  /// @brief 指定日志文件的最大大小
   ///
-  /// @detail If file size of corresponding log file (for corresponding level) is >= specified size, log file will
-  /// be truncated and re-initiated.
+  /// @detail 如果相应日志文件（对于相应级别）的文件大小>=指定大小，日志文件将被截断并重新初始化
   MaxLogFileSize = 128,
-  /// @brief Specifies number of log entries to hold until we flush pending log data
+  /// @brief 指定在刷新待处理的日志数据之前要保留的日志条目数
   LogFlushThreshold = 256,
-  /// @brief Represents unknown configuration
+  /// @brief 表示未知配置
   Unknown = 1010
 };
-/// @brief Static class that contains helper functions for el::ConfigurationType
+/// @brief 包含el::ConfigurationType辅助函数的静态类
 class ConfigurationTypeHelper : base::StaticClass {
  public:
-  /// @brief Represents minimum valid configuration type. Useful when iterating through enum.
+  /// @brief 表示最小有效配置类型。在遍历枚举时有用
   static const base::type::EnumType kMinValid = static_cast<base::type::EnumType>(ConfigurationType::Enabled);
-  /// @brief Represents maximum valid configuration type. This is used internally and you should not need it.
+  /// @brief 表示最大有效配置类型。这在内部使用，您通常不需要它
   static const base::type::EnumType kMaxValid = static_cast<base::type::EnumType>(ConfigurationType::MaxLogFileSize);
-  /// @brief Casts configuration type to int, useful for iterating through enum.
+  /// @brief 将配置类型转换为int，在遍历枚举时有用
   static base::type::EnumType castToInt(ConfigurationType configurationType) {
     return static_cast<base::type::EnumType>(configurationType);
   }
-  /// @brief Casts int(ushort) to configuration type, useful for iterating through enum.
+  /// @brief 将int(ushort)转换为配置类型，在遍历枚举时有用
   static ConfigurationType castFromInt(base::type::EnumType c) {
     return static_cast<ConfigurationType>(c);
   }
-  /// @brief Converts configuration type to associated const char*
-  /// @returns Upper case string based configuration type.
+  /// @brief 将配置类型转换为关联的const char*
+  /// @returns 基于大写字符串的配置类型
   static const char* convertToString(ConfigurationType configurationType);
-  /// @brief Converts from configStr to ConfigurationType
-  /// @param configStr Upper case string based configuration type.
-  ///        Lower case is also valid but providing upper case is recommended.
+  /// @brief 从configStr转换为ConfigurationType
+  /// @param configStr 基于大写字符串的配置类型
+  ///        小写也有效，但建议提供大写
   static ConfigurationType convertFromString(const char* configStr);
-  /// @brief Applies specified function to each configuration type starting from startIndex
-  /// @param startIndex initial value to start the iteration from. This is passed by pointer and is left-shifted
-  ///        so this can be used inside function (fn) to represent current configuration type.
-  /// @param fn function to apply with each configuration type.
-  ///        This bool represent whether or not to stop iterating through configurations.
+  /// @brief 从startIndex开始对每个配置类型应用指定函数
+  /// @param startIndex 开始迭代的初始值。这通过指针传递并被左移，
+  ///        因此可以在函数(fn)内部使用它来表示当前配置类型
+  /// @param fn 对每个配置类型应用的函数
+  ///        此bool表示是否停止遍历配置
   static inline void forEachConfigType(base::type::EnumType* startIndex, const std::function<bool(void)>& fn);
 };
 /// @brief Flags used while writing logs. This flags are set by user
