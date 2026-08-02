@@ -16,6 +16,9 @@
 
 using json = nlohmann::json;
 
+// 字符串分割函数：将字符串按照指定分隔符分割成多个子字符串
+// 参数：str - 待分割的原始字符串，pattern - 分隔符模式
+// 返回值：包含所有分割后子字符串的列表
 std::list<std::string> split(const std::string &str, const std::string &pattern)
 {
     std::list<std::string> res;
@@ -36,11 +39,15 @@ std::list<std::string> split(const std::string &str, const std::string &pattern)
     return res;
 }
 
+// ISP配置文件解析函数：从JSON格式配置文件中解析ISP处理参数
+// 参数：cfg_file_path - 配置文件的路径，isp_prm - 输出参数，用于存储解析后的ISP参数
+// 返回值：成功返回0，失败返回-1
 int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
 {
 
     std::ifstream fs(cfg_file_path);
 
+    // 检查配置文件是否成功打开
     if (!fs.is_open())
     {
         LOG(ERROR) << cfg_file_path << " open failed";
@@ -49,16 +56,21 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
 
     json j_root;
 
+    // 将JSON文件内容解析到json对象中
     fs >> j_root;
 
     try {
+        // 解析基础文件路径配置
         // raw path
         isp_prm.raw_file = j_root["raw_file"];
         isp_prm.out_file_path = j_root["out_file_path"];
+
+        // 传感器信息解析
         // sensor info
         isp_prm.sensor_name = j_root["info"]["sensor_name"];
         LOG(INFO) << "Sensor Name: " << isp_prm.sensor_name;
 
+        // CFA（彩色滤波阵列）类型解析：根据字符串转换为枚举类型
         auto cfa_str = j_root["info"]["cfa"];
         if (cfa_str == "RGGB")
         {

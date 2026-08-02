@@ -22,35 +22,50 @@
 #include "EasyBMP.h"
 using namespace std;
 
+// 主函数：演示EasyBMP库的多种功能
 int main( int argc, char* argv[] )
 {
+ // 输出版本信息和版权声明
  cout << endl
       << "Using EasyBMP Version " << _EasyBMP_Version_ << endl << endl
       << "Copyright (c) by the EasyBMP Project 2005-6" << endl
       << "WWW: http://easybmp.sourceforge.net" << endl << endl;
-	  
+
+ // 创建BMP对象：用于存储文本图像
  BMP Text;
+ // 从文件读取文本图像（包含透明背景的文字）
  Text.ReadFromFile("EasyBMPtext.bmp");
-  
+
+ // 创建BMP对象：用于存储背景图像
  BMP Background;
+ // 从文件读取背景图像
  Background.ReadFromFile("EasyBMPbackground.bmp");
-  
+
+ // 创建BMP对象：用于存储最终输出图像
  BMP Output;
+ // 设置输出图像的大小与背景图像相同
  Output.SetSize( Background.TellWidth() , Background.TellHeight() );
+ // 设置输出图像的位深度为24位（真彩色）
  Output.SetBitDepth( 24 );
- 
+
+ // 将背景图像完全复制到输出图像中
+ // 参数说明：源图像，源图像x范围(0到最大宽度-1)，源图像y范围(最大高度-1到0)，目标图像，目标位置(0,0)
  RangedPixelToPixelCopy( Background, 0, Output.TellWidth()-1,
-                         Output.TellHeight()-1 , 0, 
+                         Output.TellHeight()-1 , 0,
                          Output, 0,0 );	
-						 
- RangedPixelToPixelCopyTransparent( Text, 0, 380, 
+
+ // 将文本图像的一部分透明地复制到输出图像中
+ // 参数说明：源图像，源x范围(0-380)，源y范围(43-0)，目标图像，目标位置(110,5)，透明色(使用左上角像素作为透明色)
+ RangedPixelToPixelCopyTransparent( Text, 0, 380,
                                     43, 0,
-									Output, 110,5, 
+									Output, 110,5,
 									*Text(0,0) );
 
- RangedPixelToPixelCopyTransparent( Text, 0, Text.TellWidth()-1, 
+ // 将文本图像的另一部分透明地复制到输出图像中
+ // 参数说明：源图像，源x范围(0-最大宽度-1)，源y范围(最大宽度-1-50)，目标图像，目标位置(100,442)，透明色(使用(0,49)位置的像素作为透明色)
+ RangedPixelToPixelCopyTransparent( Text, 0, Text.TellWidth()-1,
                                     Text.TellWidth()-1, 50,
-									Output, 100,442, 
+									Output, 100,442,
 									*Text(0,49) );
 					
  Output.SetBitDepth( 32 );
