@@ -23,6 +23,8 @@
  */
 #include "modules/modules.h"
 #include "common/pipeline.h"
+#include "common/image_save.h"
+#include <sstream>
 
 /**
  * @brief 注册所有内置 ISP 模块到全局注册表
@@ -144,6 +146,35 @@ int IspPipeline::MakePipe(const std::list<std::string> &pipeline_str)
 }
 
 /**
+ * @brief 保存调试图像的内部函数实现
+ *
+ * @param frame 帧对象
+ * @param module_name 模块名称
+ * @param stage 阶段（"input"或"output"）
+ * @param data_type 数据类型
+ * @param domain 颜色域
+ */
+void IspPipeline::SaveDebugImage(Frame *frame, const std::string &module_name,
+                                const std::string &stage, DataPtrTypes data_type,
+                                ColorDomains domain)
+{
+    if (!debug_save_enabled_) {
+        return;
+    }
+
+    // 创建输出目录
+    ImageSaver::CreateOutputDirectory(debug_save_path_);
+
+    // 生成文件名：frame_模块名_阶段.png
+    std::ostringstream filename;
+    filename << debug_save_path_ << "/frame_" << frame_count_ << "_"
+             << module_name << "_" << stage << ".png";
+
+    // 保存图像
+    ImageSaver::SaveFrame(frame, filename.str(), data_type, domain);
+}
+
+/**
  * @brief 运行整条流水线，对一帧图像做完整 ISP 处理
  *
  * @param frame 待处理的帧（含输入数据，处理结果也写回该 frame）
@@ -155,6 +186,7 @@ int IspPipeline::MakePipe(const std::list<std::string> &pipeline_str)
  *   2. 遍历 pipe_ 中的每个模块，依次调用其 run_function
  *   3. 使用 std::chrono 统计每个模块的执行耗时（毫秒），用于性能分析
  *   4. 任一模块返回非 0 即视为失败，立即终止并返回 -1
+ *   5. 如果启用调试保存，在每个模块执行前后保存输入输出图像
  */
 int IspPipeline::RunPipe(Frame *frame, const IspPrms *prms)
 {
@@ -165,20 +197,47 @@ int IspPipeline::RunPipe(Frame *frame, const IspPrms *prms)
     }
     // uint64_t start_tick, end_tick;
     LOG(INFO) << "============= user pipeline running ==============";
+
+    // 如果启用调试保存，创建输出目录并增加帧计数
+    if (debug_save_enabled_) {
+        ImageSaver::CreateOutputDirectory(debug_save_path_);
+        LOG(INFO) << "Debug save enabled. Saving images to: " << debug_save_path_;
+    }
+
     for (auto isp_mod : pipe_)
     {
         // 记录模块开始时间（自 epoch 起的毫秒数）
         auto start_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+        // 保存模块输入图像（如果启用调试保存）
+        if (debug_save_enabled_) {
+            LOG(INFO) << "Saving input image for module: " << isp_mod.name;
+            SaveDebugImage(frame, isp_mod.name, "input", isp_mod.in_type, isp_mod.in_domain);
+        }
+
         // 调用模块的处理函数，传入帧与参数
         if (isp_mod.run_function(frame, prms) != 0)
         {
             LOG(ERROR) << "pipeline run failed, mod " << isp_mod.name;
             return -1;
         }
+
+        // 保存模块输出图像（如果启用调试保存）
+        if (debug_save_enabled_) {
+            LOG(INFO) << "Saving output image for module: " << isp_mod.name;
+            SaveDebugImage(frame, isp_mod.name, "output", isp_mod.out_type, isp_mod.out_domain);
+        }
+
         // 记录模块结束时间，计算并打印耗时
         auto end_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
         LOG(INFO) << "mod " << isp_mod.name << "\t time: " << (end_ms - start_ms).count() << "ms";
     }
+
+    // 增加帧计数
+    if (debug_save_enabled_) {
+        frame_count_++;
+    }
+
     LOG(INFO) << "============= user pipeline running end ==============";
     return 0;
 }
