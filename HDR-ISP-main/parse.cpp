@@ -90,6 +90,7 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
         }
         LOG(INFO) << "Sensor CFA: " << cfa_str;
 
+        // RAW数据类型解析：根据字符串转换为对应的RAW数据位深枚举类型
         auto raw_type_str = j_root["info"]["data_type"];
         if (raw_type_str == "RAW10")
         {
@@ -109,20 +110,27 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
         }
         LOG(INFO) << "Sensor DT: " << raw_type_str;
 
+        // 传感器基本参数解析：包括位深、最大值、分辨率、MIPI打包格式等
         isp_prm.info.bpp = static_cast<int>(j_root["info"]["bpp"]);
         int max_bit = int(j_root["info"]["max_bit"]);
+        // 计算最大像素值：(2^max_bit) - 1
         isp_prm.info.max_val = (1 << max_bit) - 1;
         isp_prm.info.width = static_cast<int>(j_root["info"]["width"]);
         isp_prm.info.height = static_cast<int>(j_root["info"]["height"]);
         isp_prm.info.mipi_packed = static_cast<int>(j_root["info"]["mipi_packed"]);
         LOG(INFO) << "Sensor Resolution: " << isp_prm.info.width << "*" << isp_prm.info.height;
-        //
+
+        // ISP处理管道解析：将管道字符串按"|"分割成多个处理步骤
         std::string pipeline = j_root["pipe"];
         isp_prm.pipe = std::move(split(pipeline, "|"));
+        // 黑电平校正（BLC）参数解析
         // blc
         isp_prm.blc = j_root["blc"];
+
+        // 白平衡增益解析：分别解析D65和D50光源下的增益值
         // wbgain
         auto d65_gains = j_root["wb_gain"]["d65_gain"];
+        // 验证增益值的数量必须为4个（对应RGGB四个通道）
         if (d65_gains.size() != 4)
         {
             LOG(ERROR) << "d65 gains size error";
@@ -133,6 +141,8 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
             isp_prm.wb_gains.d65_gain[i] = d65_gains[i];
             //LOG(INFO) << "d65" << isp_prm.wb_gains.d65_gain[i];
         }
+
+        // 解析D50光源下的白平衡增益
         auto d50_gains = j_root["wb_gain"]["d50_gain"];
         if (d50_gains.size() != 4)
         {
@@ -144,18 +154,21 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
             isp_prm.wb_gains.d50_gain[i] = d50_gains[i];
         }
 
+        // 去伪影分段线性曲线（DEPWL）参数解析
         // pwl
         isp_prm.depwl_prm.pedestal = j_root["depwl"]["pedestal"];
         isp_prm.depwl_prm.pwl_nums = j_root["depwl"]["pwl_nums"];
         auto pwl_x = j_root["depwl"]["pwl_x"];
         auto pwl_y = j_root["depwl"]["pwl_y"];
         auto pwl_slope = j_root["depwl"]["slope"];
+        // 验证分段线性曲线的x坐标、y坐标和斜率数量是否一致
         if ((pwl_x.size() != isp_prm.depwl_prm.pwl_nums) || (pwl_y.size() != isp_prm.depwl_prm.pwl_nums) || (pwl_slope.size() != isp_prm.depwl_prm.pwl_nums))
         {
             LOG(ERROR) << "pwl input prms error";
             return -1;
         }
 
+        // 存储分段线性曲线的坐标点和斜率
         for (int i = 0; i < isp_prm.depwl_prm.pwl_nums; ++i)
         {
             isp_prm.depwl_prm.x_cood[i] = pwl_x[i];
@@ -163,6 +176,7 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
             isp_prm.depwl_prm.slope[i] = pwl_slope[i];
         }
 
+        // 局部色调映射（LTM）参数解析
         // pwl
         isp_prm.ltm_prms.constrast = j_root["ltm"]["constrast"];
         isp_prm.ltm_prms.in_bits = j_root["ltm"]["in_bit"];

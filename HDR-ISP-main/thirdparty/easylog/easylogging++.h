@@ -12,15 +12,23 @@
 
 #ifndef EASYLOGGINGPP_H
 #define EASYLOGGINGPP_H
-// Compilers and C++0x/C++11 Evaluation
+
+// ============================================================
+// 编译器和C++标准版本检测
+// ============================================================
+
+// 检测C++11或更高版本支持
 #if __cplusplus >= 201103L
 #  define ELPP_CXX11 1
 #endif  // __cplusplus >= 201103L
+// GCC编译器检测
 #if (defined(__GNUC__))
 #  define ELPP_COMPILER_GCC 1
 #else
 #  define ELPP_COMPILER_GCC 0
 #endif
+
+// GCC版本号计算 (主版本*10000 + 次版本*100 + 补丁版本)
 #if ELPP_COMPILER_GCC
 #    define ELPP_GCC_VERSION (__GNUC__ * 10000 \
 + __GNUC_MINOR__ * 100 \
@@ -29,21 +37,25 @@
 #    define ELPP_CXX0X 1
 #  endif
 #endif
-// Visual C++
+
+// Visual C++编译器检测
 #if defined(_MSC_VER)
 #  define ELPP_COMPILER_MSVC 1
 #else
 #  define ELPP_COMPILER_MSVC 0
 #endif
 #define ELPP_CRT_DBG_WARNINGS ELPP_COMPILER_MSVC
+
+// MSVC版本对应的C++标准支持检测
 #if ELPP_COMPILER_MSVC
-#  if (_MSC_VER == 1600)
+#  if (_MSC_VER == 1600)  // VS2010
 #    define ELPP_CXX0X 1
-#  elif(_MSC_VER >= 1700)
+#  elif(_MSC_VER >= 1700)  // VS2012及更高版本
 #    define ELPP_CXX11 1
 #  endif
 #endif
-// Clang++
+
+// Clang++编译器检测
 #if (defined(__clang__) && (__clang__ == 1))
 #  define ELPP_COMPILER_CLANG 1
 #else
@@ -67,24 +79,32 @@
 #else
 #  define ELPP_CYGWIN 0
 #endif
+// Intel编译器检测
 #if (defined(__INTEL_COMPILER))
 #  define ELPP_COMPILER_INTEL 1
 #else
 #  define ELPP_COMPILER_INTEL 0
 #endif
-// Operating System Evaluation
-// Windows
+
+// ============================================================
+// 操作系统平台检测
+// ============================================================
+
+// Windows系统检测
 #if (defined(_WIN32) || defined(_WIN64))
 #  define ELPP_OS_WINDOWS 1
 #else
 #  define ELPP_OS_WINDOWS 0
 #endif
-// Linux
+
+// Linux系统检测
 #if (defined(__linux) || defined(__linux__))
 #  define ELPP_OS_LINUX 1
 #else
 #  define ELPP_OS_LINUX 0
 #endif
+
+// macOS系统检测
 #if (defined(__APPLE__))
 #  define ELPP_OS_MAC 1
 #else

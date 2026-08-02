@@ -67,30 +67,43 @@ int main( int argc, char* argv[] )
                                     Text.TellWidth()-1, 50,
 									Output, 100,442,
 									*Text(0,49) );
-					
+
+ // 设置输出图像的位深度为32位（带Alpha通道的RGBA）
  Output.SetBitDepth( 32 );
- cout << "writing 32bpp ... " << endl;					
+ cout << "writing 32bpp ... " << endl;
+ // 将32位图像写入文件，演示高色深输出
  Output.WriteToFile( "EasyBMPoutput32bpp.bmp" );
 
+ // 设置输出图像的位深度为24位（RGB真彩色）
  Output.SetBitDepth( 24 );
- cout << "writing 24bpp ... " << endl;			
+ cout << "writing 24bpp ... " << endl;
+ // 将24位图像写入文件，这是最常见的位图格式
  Output.WriteToFile( "EasyBMPoutput24bpp.bmp" );
- 
+
+ // 设置输出图像的位深度为8位（256色）
  Output.SetBitDepth( 8 );
- cout << "writing 8bpp ... " << endl;					
+ cout << "writing 8bpp ... " << endl;
+ // 将8位图像写入文件，演示调色板模式
  Output.WriteToFile( "EasyBMPoutput8bpp.bmp" );
 
+ // 设置输出图像的位深度为4位（16色）
  Output.SetBitDepth( 4 );
- cout << "writing 4bpp ... " << endl;					
+ cout << "writing 4bpp ... " << endl;
+ // 将4位图像写入文件，演示低色深模式
  Output.WriteToFile( "EasyBMPoutput4bpp.bmp" );
- 
+
+ // 设置输出图像的位深度为1位（黑白）
  Output.SetBitDepth( 1 );
- cout << "writing 1bpp ... " << endl;					
+ cout << "writing 1bpp ... " << endl;
+ // 将1位图像写入文件，演示单色模式
  Output.WriteToFile( "EasyBMPoutput1bpp.bmp" );
- 
+
+ // 重新设置为24位，准备进行缩放操作
  Output.SetBitDepth( 24 );
+ // 按百分比缩放图像：'p'表示按百分比，50表示缩小到50%
  Rescale( Output, 'p' , 50 );
  cout << "writing 24bpp scaled image ..." << endl;
+ // 将缩放后的图像写入文件，演示图像缩放功能
  Output.WriteToFile( "EasyBMPoutput24bpp_rescaled.bmp" );
 
  return 0;
