@@ -8,11 +8,30 @@
  * Copyright (c) of ADAS_EYES 2023
  *
  */
+// =============================================================================
+// 模块: wbgain (白平衡增益 / White Balance Gain)
+// -----------------------------------------------------------------------------
+// 功能: 对 Bayer RAW 各通道施加不同增益, 使白色物体在成像后仍为白色(R=G=B),
+//       消除光源色温造成的偏色。
+//
+// 背景: 不同色温光源(如 D65 日光 ~6500K, A 灯泡 ~2856K)光谱组成不同, 传感器
+//       R/Gr/Gb/B 四通道响应不一致, 导致白色物体拍出偏蓝或偏黄。白平衡通过给
+//       各通道乘以增益(通常以 G 为基准, 调整 R 和 B)来校正。
+//
+// 算法: 根据 CFA 类型查找像素所属通道, 乘以对应增益。
+//   - r_gain  : R 通道增益
+//   - gr_gain : Gr 通道增益(通常为 1)
+//   - gb_gain : Gb 通道增益(通常为 1)
+//   - b_gain  : B 通道增益
+// 增益由 AWB(自动白平衡)算法估算, 或按光源色温查表(d65_gain 为 D65 光源)。
+// 数据流向: s32 -> s32 (色彩域保持 RAW)。
+// =============================================================================
 
 #include "modules/modules.h"
 
 #define MOD_NAME "wbgain"
 
+// 白平衡增益主函数
 static int WbGain(Frame *frame, const IspPrms *isp_prm)
 {
     if ((frame == nullptr) || (isp_prm == nullptr))
@@ -23,14 +42,15 @@ static int WbGain(Frame *frame, const IspPrms *isp_prm)
     int pixel_idx = 0;
     int pwl_idx = 0;
 
-    int32_t *raw32_in = reinterpret_cast<int32_t *>(frame->data.raw_s32_i);
-    int32_t *raw32_out = reinterpret_cast<int32_t *>(frame->data.raw_s32_o);
+    int32_t *raw32_in = reinterpret_cast<int32_t *>(frame->data.raw_s32_i);   // DPC 后 RAW 输入
+    int32_t *raw32_out = reinterpret_cast<int32_t *>(frame->data.raw_s32_o);  // 白平衡后输出
 
     // default d65
-    float r_gain = isp_prm->wb_gains.d65_gain[0];
-    float gr_gain = isp_prm->wb_gains.d65_gain[1];
-    float gb_gain = isp_prm->wb_gains.d65_gain[2];
-    float b_gain = isp_prm->wb_gains.d65_gain[3];
+    // 默认使用 D65(标准日光 ~6500K) 色温下的增益
+    float r_gain = isp_prm->wb_gains.d65_gain[0];   // R 通道增益
+    float gr_gain = isp_prm->wb_gains.d65_gain[1];  // Gr 通道增益
+    float gb_gain = isp_prm->wb_gains.d65_gain[2];  // Gb 通道增益
+    float b_gain = isp_prm->wb_gains.d65_gain[3];   // B 通道增益
 
     FOR_ITER(h, frame->info.height)
     {
@@ -38,6 +58,7 @@ static int WbGain(Frame *frame, const IspPrms *isp_prm)
         {
             pixel_idx = h * frame->info.width + w;
 
+            // 根据像素 (w%2, h%2) 在 CFA 查找表中的类型选择对应通道增益
             int cfa_id = static_cast<int>(frame->info.cfa);
             switch (kPixelCfaLut[cfa_id][w % 2][h % 2])
             {
@@ -66,6 +87,7 @@ static int WbGain(Frame *frame, const IspPrms *isp_prm)
     return 0;
 }
 
+// 模块注册: s32 -> s32, RAW -> RAW
 void RegisterWbGaincMod()
 {
     IspModule mod;
