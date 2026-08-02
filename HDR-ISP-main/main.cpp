@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     frame.ReadFileToFrame(isp_prms.raw_file, width * height * isp_prms.info.bpp / 8);
 
-    pipeline.MakePipe(isp_prms.pipe);
+    pipeline.MakePipe(isp_prms.pipe, &isp_prms);
     pipeline.PrintPipe();
 
     ret = pipeline.RunPipe(&frame, &isp_prms);

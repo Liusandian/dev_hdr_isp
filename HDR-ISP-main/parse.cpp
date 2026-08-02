@@ -65,6 +65,21 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
         isp_prm.raw_file = j_root["raw_file"];
         isp_prm.out_file_path = j_root["out_file_path"];
 
+        // 流水线全局配置解析（新增）
+        if (j_root.contains("pipeline_config")) {
+            auto pipeline_config = j_root["pipeline_config"];
+            isp_prm.pipeline_config.enable_performance_tracking = pipeline_config.value("enable_performance_tracking", true);
+            isp_prm.pipeline_config.enable_strict_validation = pipeline_config.value("enable_strict_validation", true);
+            isp_prm.pipeline_config.log_level = pipeline_config.value("log_level", "INFO");
+            isp_prm.pipeline_config.enable_module_timing = pipeline_config.value("enable_module_timing", true);
+            isp_prm.pipeline_config.stop_on_first_error = pipeline_config.value("stop_on_first_error", true);
+            isp_prm.pipeline_config.print_pipeline_on_start = pipeline_config.value("print_pipeline_on_start", true);
+            isp_prm.pipeline_config.print_pipeline_on_end = pipeline_config.value("print_pipeline_on_end", true);
+            LOG(INFO) << "Pipeline config loaded: log_level=" << isp_prm.pipeline_config.log_level;
+        } else {
+            LOG(WARNING) << "pipeline_config not found in JSON, using default values";
+        }
+
         // 传感器信息解析
         // sensor info
         isp_prm.sensor_name = j_root["info"]["sensor_name"];

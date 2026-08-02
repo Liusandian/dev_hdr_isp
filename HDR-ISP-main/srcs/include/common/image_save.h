@@ -2,7 +2,7 @@
 #define IMAGE_SAVE_H
 
 #include <string>
-#include <opencv2/opencv.hpp>
+// #include <opencv2/opencv.hpp> // OpenCV依赖已禁用
 #include "common/frame.h"
 #include "common/types.h"
 

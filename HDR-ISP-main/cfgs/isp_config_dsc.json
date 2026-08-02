@@ -1,6 +1,15 @@
 {
     "raw_file": "./data/DSC_1339_768x512_rggb.raw",
     "out_file_path": "./",
+    "pipeline_config": {
+        "enable_performance_tracking": true,
+        "enable_strict_validation": true,
+        "log_level": "INFO",
+        "enable_module_timing": true,
+        "stop_on_first_error": true,
+        "print_pipeline_on_start": true,
+        "print_pipeline_on_end": true
+    },
     "info": {
         "sensor_name": "dsc",
         "cfa": "RGGB",

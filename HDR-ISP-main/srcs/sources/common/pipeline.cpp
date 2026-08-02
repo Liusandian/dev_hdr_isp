@@ -23,7 +23,7 @@
  */
 #include "modules/modules.h"
 #include "common/pipeline.h"
-#include "common/image_save.h"
+// #include "common/image_save.h" // 暂时禁用调试保存功能
 #include <sstream>
 
 /**
@@ -107,16 +107,23 @@ IspPipeline::IspPipeline(std::list<std::string> pipeline)
  *     （域匹配，例如 RAW 域输出不能直接接 YUV 域处理模块）
  *   - 任一校验失败都会标记 is_pipe_vaild_ = false，RunPipe 时会拒绝执行
  */
-int IspPipeline::MakePipe(const std::list<std::string> &pipeline_str)
+int IspPipeline::MakePipe(const std::list<std::string> &pipeline_str, const IspPrms *prms)
 {
     IspModule mod;
     IspModule last_mod;
+
+    // 从配置中获取是否启用严格验证（新增）
+    bool enable_strict_validation = true;
+    if (prms != nullptr && prms->pipeline_config.enable_strict_validation) {
+        enable_strict_validation = prms->pipeline_config.enable_strict_validation;
+    }
+
     for (auto item : pipeline_str)
     {
         if (0 == GetIspModuleFromName(item, mod))
         {
-            // 已有前驱模块时，做位宽与域的一致性校验
-            if (pipe_.size() > 0)
+            // 已有前驱模块时，根据配置决定是否做位宽与域的一致性校验
+            if (pipe_.size() > 0 && enable_strict_validation)
             {
                 // 校验：前一模块输出位宽/域 必须等于 当前模块输入位宽/域
                 if ((mod.in_type != last_mod.out_type) || (mod.in_domain != last_mod.out_domain))
@@ -162,6 +169,8 @@ void IspPipeline::SaveDebugImage(Frame *frame, const std::string &module_name,
         return;
     }
 
+    // 暂时禁用调试保存功能
+    /*
     // 创建输出目录
     ImageSaver::CreateOutputDirectory(debug_save_path_);
 
@@ -172,6 +181,7 @@ void IspPipeline::SaveDebugImage(Frame *frame, const std::string &module_name,
 
     // 保存图像
     ImageSaver::SaveFrame(frame, filename.str(), data_type, domain);
+    */
 }
 
 /**
@@ -195,13 +205,31 @@ int IspPipeline::RunPipe(Frame *frame, const IspPrms *prms)
         LOG(ERROR) << "pipeline is not vailed..";
         return -1;
     }
-    // uint64_t start_tick, end_tick;
-    LOG(INFO) << "============= user pipeline running ==============";
+
+    // 从配置中获取控制参数（新增）
+    bool enable_module_timing = true;
+    bool stop_on_first_error = true;
+    bool print_pipeline_on_start = true;
+    bool print_pipeline_on_end = true;
+
+    if (prms != nullptr) {
+        enable_module_timing = prms->pipeline_config.enable_module_timing;
+        stop_on_first_error = prms->pipeline_config.stop_on_first_error;
+        print_pipeline_on_start = prms->pipeline_config.print_pipeline_on_start;
+        print_pipeline_on_end = prms->pipeline_config.print_pipeline_on_end;
+    }
+
+    // 根据配置决定是否打印流水线开始信息
+    if (print_pipeline_on_start) {
+        LOG(INFO) << "============= user pipeline running ==============";
+    }
 
     // 如果启用调试保存，创建输出目录并增加帧计数
     if (debug_save_enabled_) {
-        ImageSaver::CreateOutputDirectory(debug_save_path_);
-        LOG(INFO) << "Debug save enabled. Saving images to: " << debug_save_path_;
+        // ImageSaver::CreateOutputDirectory(debug_save_path_); // 暂时禁用
+        if (print_pipeline_on_start) {
+            LOG(INFO) << "Debug save enabled (but temporarily disabled due to OpenCV dependency)";
+        }
     }
 
     for (auto isp_mod : pipe_)
@@ -211,7 +239,9 @@ int IspPipeline::RunPipe(Frame *frame, const IspPrms *prms)
 
         // 保存模块输入图像（如果启用调试保存）
         if (debug_save_enabled_) {
-            LOG(INFO) << "Saving input image for module: " << isp_mod.name;
+            if (print_pipeline_on_start) {
+                LOG(INFO) << "Saving input image for module: " << isp_mod.name;
+            }
             SaveDebugImage(frame, isp_mod.name, "input", isp_mod.in_type, isp_mod.in_domain);
         }
 
@@ -219,18 +249,32 @@ int IspPipeline::RunPipe(Frame *frame, const IspPrms *prms)
         if (isp_mod.run_function(frame, prms) != 0)
         {
             LOG(ERROR) << "pipeline run failed, mod " << isp_mod.name;
-            return -1;
+
+            // 根据配置决定是否在遇到错误时立即停止
+            if (stop_on_first_error) {
+                if (print_pipeline_on_end) {
+                    LOG(INFO) << "============= user pipeline running end (with errors) ==============";
+                }
+                return -1;
+            } else {
+                LOG(WARNING) << "mod " << isp_mod.name << " failed but continuing due to stop_on_first_error=false";
+            }
         }
 
         // 保存模块输出图像（如果启用调试保存）
         if (debug_save_enabled_) {
-            LOG(INFO) << "Saving output image for module: " << isp_mod.name;
+            if (print_pipeline_on_start) {
+                LOG(INFO) << "Saving output image for module: " << isp_mod.name;
+            }
             SaveDebugImage(frame, isp_mod.name, "output", isp_mod.out_type, isp_mod.out_domain);
         }
 
-        // 记录模块结束时间，计算并打印耗时
-        auto end_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-        LOG(INFO) << "mod " << isp_mod.name << "\t time: " << (end_ms - start_ms).count() << "ms";
+        // 根据配置决定是否记录和打印模块执行时间
+        if (enable_module_timing) {
+            // 记录模块结束时间，计算并打印耗时
+            auto end_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+            LOG(INFO) << "mod " << isp_mod.name << "\t time: " << (end_ms - start_ms).count() << "ms";
+        }
     }
 
     // 增加帧计数
@@ -238,7 +282,11 @@ int IspPipeline::RunPipe(Frame *frame, const IspPrms *prms)
         frame_count_++;
     }
 
-    LOG(INFO) << "============= user pipeline running end ==============";
+    // 根据配置决定是否打印流水线结束信息
+    if (print_pipeline_on_end) {
+        LOG(INFO) << "============= user pipeline running end ==============";
+    }
+
     return 0;
 }
 

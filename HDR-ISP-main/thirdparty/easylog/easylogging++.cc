@@ -23,16 +23,21 @@ namespace base {
 // el::base::consts
 namespace consts {
 
-// Level log values - These are values that are replaced in place of %level format specifier
-// Extra spaces after format specifiers are only for readability purposes in log files
+// ============================================================
+// 日志级别常量定义 - 这些值替换%level格式说明符
+// 格式说明符后的额外空格仅用于日志文件中的可读性
+// ============================================================
+
 static const base::type::char_t* kInfoLevelLogValue     =   ELPP_LITERAL("INFO");
 static const base::type::char_t* kDebugLevelLogValue    =   ELPP_LITERAL("DEBUG");
 static const base::type::char_t* kWarningLevelLogValue  =   ELPP_LITERAL("WARNING");
 static const base::type::char_t* kErrorLevelLogValue    =   ELPP_LITERAL("ERROR");
 static const base::type::char_t* kFatalLevelLogValue    =   ELPP_LITERAL("FATAL");
 static const base::type::char_t* kVerboseLevelLogValue  =
-  ELPP_LITERAL("VERBOSE"); // will become VERBOSE-x where x = verbose level
+  ELPP_LITERAL("VERBOSE"); // 将变为VERBOSE-x，其中x = 详细级别
 static const base::type::char_t* kTraceLevelLogValue    =   ELPP_LITERAL("TRACE");
+
+// 日志级别短格式常量
 static const base::type::char_t* kInfoLevelShortLogValue     =   ELPP_LITERAL("I");
 static const base::type::char_t* kDebugLevelShortLogValue    =   ELPP_LITERAL("D");
 static const base::type::char_t* kWarningLevelShortLogValue  =   ELPP_LITERAL("W");
@@ -40,7 +45,11 @@ static const base::type::char_t* kErrorLevelShortLogValue    =   ELPP_LITERAL("E
 static const base::type::char_t* kFatalLevelShortLogValue    =   ELPP_LITERAL("F");
 static const base::type::char_t* kVerboseLevelShortLogValue  =   ELPP_LITERAL("V");
 static const base::type::char_t* kTraceLevelShortLogValue    =   ELPP_LITERAL("T");
-// Format specifiers - These are used to define log format
+
+// ============================================================
+// 格式说明符 - 用于定义日志格式
+// ============================================================
+
 static const base::type::char_t* kAppNameFormatSpecifier          =      ELPP_LITERAL("%app");
 static const base::type::char_t* kLoggerIdFormatSpecifier         =      ELPP_LITERAL("%logger");
 static const base::type::char_t* kThreadIdFormatSpecifier         =      ELPP_LITERAL("%thread");
@@ -57,7 +66,11 @@ static const base::type::char_t* kCurrentHostFormatSpecifier      =      ELPP_LI
 static const base::type::char_t* kMessageFormatSpecifier          =      ELPP_LITERAL("%msg");
 static const base::type::char_t* kVerboseLevelFormatSpecifier     =      ELPP_LITERAL("%vlevel");
 static const char* kDateTimeFormatSpecifierForFilename            =      "%datetime";
-// Date/time
+
+// ============================================================
+// 日期时间相关常量
+// ============================================================
+
 static const char* kDays[7]                         =      { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 static const char* kDaysAbbrev[7]                   =      { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 static const char* kMonths[12]                      =      { "January", "February", "March", "April", "May", "June", "July", "August",
@@ -69,7 +82,10 @@ static const char* kDefaultDateTimeFormatInFilename =      "%Y-%M-%d_%H-%m";
 static const int kYearBase                          =      1900;
 static const char* kAm                              =      "AM";
 static const char* kPm                              =      "PM";
-// Miscellaneous constants
+
+// ============================================================
+// 其他杂项常量
+// ============================================================
 
 static const char* kNullPointer                            =      "nullptr";
 #if ELPP_VARIADIC_TEMPLATES_SUPPORTED
@@ -129,8 +145,15 @@ static void abort(int status, const std::string& reason) {
 
 // LevelHelper
 
+// ============================================================
+// LevelHelper 类实现 - 日志级别辅助函数
+// ============================================================
+
+/// @brief 将日志级别枚举转换为字符串表示
+/// @param level 日志级别枚举值
+/// @return 对应的字符串表示
 const char* LevelHelper::convertToString(Level level) {
-  // Do not use switch over strongly typed enums because Intel C++ compilers dont support them yet.
+  // 不要对强类型枚举使用switch，因为Intel C++编译器尚不支持它们
   if (level == Level::Global) return "GLOBAL";
   if (level == Level::Debug) return "DEBUG";
   if (level == Level::Info) return "INFO";
@@ -142,11 +165,13 @@ const char* LevelHelper::convertToString(Level level) {
   return "UNKNOWN";
 }
 
+/// @brief 字符串到日志级别的映射项结构
 struct StringToLevelItem {
-  const char* levelString;
-  Level level;
+  const char* levelString;  // 级别字符串
+  Level level;              // 对应的级别枚举
 };
 
+/// @brief 字符串到日志级别的映射表
 static struct StringToLevelItem stringToLevelMap[] = {
   { "global", Level::Global },
   { "debug", Level::Debug },
@@ -158,6 +183,9 @@ static struct StringToLevelItem stringToLevelMap[] = {
   { "trace", Level::Trace }
 };
 
+/// @brief 将字符串转换为日志级别枚举
+/// @param levelStr 日志级别字符串（不区分大小写）
+/// @return 对应的日志级别枚举，如果未找到则返回Unknown
 Level LevelHelper::convertFromString(const char* levelStr) {
   for (auto& item : stringToLevelMap) {
     if (base::utils::Str::cStringCaseEq(levelStr, item.levelString)) {
@@ -167,6 +195,9 @@ Level LevelHelper::convertFromString(const char* levelStr) {
   return Level::Unknown;
 }
 
+/// @brief 遍历所有日志级别并应用指定函数
+/// @param startIndex 起始索引指针，函数会更新此值
+/// @param fn 要应用的函数，返回true时停止遍历
 void LevelHelper::forEachLevel(base::type::EnumType* startIndex, const std::function<bool(void)>& fn) {
   base::type::EnumType lIndexMax = LevelHelper::kMaxValid;
   do {
@@ -177,8 +208,13 @@ void LevelHelper::forEachLevel(base::type::EnumType* startIndex, const std::func
   } while (*startIndex <= lIndexMax);
 }
 
-// ConfigurationTypeHelper
+// ============================================================
+// ConfigurationTypeHelper 类实现 - 配置类型辅助函数
+// ============================================================
 
+/// @brief 将配置类型枚举转换为字符串表示
+/// @param configurationType 配置类型枚举值
+/// @return 对应的字符串表示
 const char* ConfigurationTypeHelper::convertToString(ConfigurationType configurationType) {
   // Do not use switch over strongly typed enums because Intel C++ compilers dont support them yet.
   if (configurationType == ConfigurationType::Enabled) return "ENABLED";
@@ -595,6 +631,13 @@ void LogBuilder::convertToColoredOutput(base::type::string_t* logLine, Level lev
 
 // Logger
 
+// ============================================================
+// Logger 类实现 - 日志记录器核心功能
+// ============================================================
+
+/// @brief Logger构造函数，使用ID和日志流引用映射
+/// @param id 日志记录器标识符
+/// @param logStreamsReference 日志流引用映射指针
 Logger::Logger(const std::string& id, base::LogStreamsReferenceMapPtr logStreamsReference) :
   m_id(id),
   m_typedConfigurations(nullptr),
@@ -604,6 +647,10 @@ Logger::Logger(const std::string& id, base::LogStreamsReferenceMapPtr logStreams
   initUnflushedCount();
 }
 
+/// @brief Logger构造函数，使用ID、配置和日志流引用映射
+/// @param id 日志记录器标识符
+/// @param configurations 配置对象
+/// @param logStreamsReference 日志流引用映射指针
 Logger::Logger(const std::string& id, const Configurations& configurations,
                base::LogStreamsReferenceMapPtr logStreamsReference) :
   m_id(id),
@@ -615,6 +662,8 @@ Logger::Logger(const std::string& id, const Configurations& configurations,
   configure(configurations);
 }
 
+/// @brief 拷贝构造函数
+/// @param logger 要拷贝的日志记录器
 Logger::Logger(const Logger& logger) {
   base::utils::safeDelete(m_typedConfigurations);
   m_id = logger.m_id;
@@ -626,6 +675,9 @@ Logger::Logger(const Logger& logger) {
   m_logStreamsReference = logger.m_logStreamsReference;
 }
 
+/// @brief 赋值运算符
+/// @param logger 要赋值的日志记录器
+/// @return 当前日志记录器的引用
 Logger& Logger::operator=(const Logger& logger) {
   if (&logger != this) {
     base::utils::safeDelete(m_typedConfigurations);
@@ -640,8 +692,10 @@ Logger& Logger::operator=(const Logger& logger) {
   return *this;
 }
 
+/// @brief 使用指定配置配置日志记录器
+/// @param configurations 配置对象
 void Logger::configure(const Configurations& configurations) {
-  m_isConfigured = false;  // we set it to false in case if we fail
+  m_isConfigured = false;  // 我们将其设置为false以防失败
   initUnflushedCount();
   if (m_typedConfigurations != nullptr) {
     Configurations* c = const_cast<Configurations*>(m_typedConfigurations->configurations());

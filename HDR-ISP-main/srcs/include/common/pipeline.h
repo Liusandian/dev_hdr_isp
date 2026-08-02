@@ -49,7 +49,7 @@ public:
 
     IspPipeline(std::list<std::string> pipeline);
 
-    int MakePipe(const std::list<std::string> &pipeline_str);
+    int MakePipe(const std::list<std::string> &pipeline_str, const IspPrms *prms = nullptr);
     int RunPipe(Frame *frame, const IspPrms *prms);
     int PrintPipe();
 

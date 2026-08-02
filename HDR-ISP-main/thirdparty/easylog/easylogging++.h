@@ -722,40 +722,39 @@ class ConfigurationTypeHelper : base::StaticClass {
   ///        此bool表示是否停止遍历配置
   static inline void forEachConfigType(base::type::EnumType* startIndex, const std::function<bool(void)>& fn);
 };
-/// @brief Flags used while writing logs. This flags are set by user
+/// @brief 写入日志时使用的标志。这些标志由用户设置
 enum class LoggingFlag : base::type::EnumType {
-  /// @brief Makes sure we have new line for each container log entry
+  /// @brief 确保每个容器日志条目都有新行
   NewLineForContainer = 1,
-  /// @brief Makes sure if -vmodule is used and does not specifies a module, then verbose
-  /// logging is allowed via that module.
+  /// @brief 如果使用-vmodule且未指定模块，则确保允许通过该模块进行详细日志记录
   AllowVerboseIfModuleNotSpecified = 2,
-  /// @brief When handling crashes by default, detailed crash reason will be logged as well
+  /// @brief 默认处理崩溃时，也会记录详细的崩溃原因
   LogDetailedCrashReason = 4,
-  /// @brief Allows to disable application abortion when logged using FATAL level
+  /// @brief 允许在使用FATAL级别记录时禁用应用程序中止
   DisableApplicationAbortOnFatalLog = 8,
-  /// @brief Flushes log with every log-entry (performance sensitive) - Disabled by default
+  /// @brief 每个日志条目都刷新日志（对性能敏感）- 默认禁用
   ImmediateFlush = 16,
-  /// @brief Enables strict file rolling
+  /// @brief 启用严格的文件滚动
   StrictLogFileSizeCheck = 32,
-  /// @brief Make terminal output colorful for supported terminals
+  /// @brief 为支持的终端使终端输出彩色化
   ColoredTerminalOutput = 64,
-  /// @brief Supports use of multiple logging in same macro, e.g, CLOG(INFO, "default", "network")
+  /// @brief 支持在同一宏中使用多个日志记录，例如CLOG(INFO, "default", "network")
   MultiLoggerSupport = 128,
-  /// @brief Disables comparing performance tracker's checkpoints
+  /// @brief 禁用性能跟踪器的检查点比较
   DisablePerformanceTrackingCheckpointComparison = 256,
-  /// @brief Disable VModules
+  /// @brief 禁用VModules
   DisableVModules = 512,
-  /// @brief Disable VModules extensions
+  /// @brief 禁用VModules扩展
   DisableVModulesExtensions = 1024,
-  /// @brief Enables hierarchical logging
+  /// @brief 启用分层日志记录
   HierarchicalLogging = 2048,
-  /// @brief Creates logger automatically when not available
+  /// @brief 当日志记录器不可用时自动创建
   CreateLoggerAutomatically = 4096,
-  /// @brief Adds spaces b/w logs that separated by left-shift operator
+  /// @brief 在由左移运算符分隔的日志之间添加空格
   AutoSpacing = 8192,
-  /// @brief Preserves time format and does not convert it to sec, hour etc (performance tracking only)
+  /// @brief 保留时间格式且不将其转换为秒、小时等（仅性能跟踪）
   FixedTimeFormat = 16384,
-  // @brief Ignore SIGINT or crash
+  // @brief 忽略SIGINT或崩溃
   IgnoreSigInt = 32768,
 };
 namespace base {
@@ -2242,66 +2241,90 @@ typedef std::shared_ptr<LogBuilder> LogBuilderPtr;
 /// @brief Represents a logger holding ID and configurations we need to write logs
 ///
 /// @detail This class does not write logs itself instead its used by writer to read configurations from.
+/// @brief 日志记录器类，负责实际的日志记录功能
+///
+/// @detail 这是Easylogging++的核心类之一，每个日志记录器实例都有自己的配置和状态。
+/// 支持线程安全，可以配置不同的日志级别、输出目标等。
 class Logger : public base::threading::ThreadSafe, public Loggable {
  public:
+  /// @brief 构造函数，使用ID和日志流引用映射创建日志记录器
   Logger(const std::string& id, base::LogStreamsReferenceMapPtr logStreamsReference);
+
+  /// @brief 构造函数，使用ID、配置和日志流引用映射创建日志记录器
   Logger(const std::string& id, const Configurations& configurations, base::LogStreamsReferenceMapPtr logStreamsReference);
+
+  /// @brief 拷贝构造函数
   Logger(const Logger& logger);
+
+  /// @brief 赋值运算符
   Logger& operator=(const Logger& logger);
 
+  /// @brief 虚析构函数，清理类型化配置
   virtual ~Logger(void) {
     base::utils::safeDelete(m_typedConfigurations);
   }
 
+  /// @brief 将日志记录器ID记录到输出流
   virtual inline void log(el::base::type::ostream_t& os) const {
     os << m_id.c_str();
   }
 
-  /// @brief Configures the logger using specified configurations.
+  /// @brief 使用指定配置配置日志记录器
   void configure(const Configurations& configurations);
 
-  /// @brief Reconfigures logger using existing configurations
+  /// @brief 使用现有配置重新配置日志记录器
   void reconfigure(void);
 
+  /// @brief 获取日志记录器ID
   inline const std::string& id(void) const {
     return m_id;
   }
 
+  /// @brief 获取父应用程序名称
   inline const std::string& parentApplicationName(void) const {
     return m_parentApplicationName;
   }
 
+  /// @brief 设置父应用程序名称
   inline void setParentApplicationName(const std::string& parentApplicationName) {
     m_parentApplicationName = parentApplicationName;
   }
 
+  /// @brief 获取配置对象指针
   inline Configurations* configurations(void) {
     return &m_configurations;
   }
 
+  /// @brief 获取类型化配置指针
   inline base::TypedConfigurations* typedConfigurations(void) {
     return m_typedConfigurations;
   }
 
+  /// @brief 检查ID是否有效
   static bool isValidId(const std::string& id);
 
-  /// @brief Flushes logger to sync all log files for all levels
+  /// @brief 刷新日志记录器以同步所有级别的所有日志文件
   void flush(void);
 
+  /// @brief 刷新指定级别的日志到指定文件流
   void flush(Level level, base::type::fstream_t* fs);
 
+  /// @brief 检查是否需要刷新指定级别的日志
   inline bool isFlushNeeded(Level level) {
     return ++m_unflushedCount.find(level)->second >= m_typedConfigurations->logFlushThreshold(level);
   }
 
+  /// @brief 获取日志构建器指针
   inline LogBuilder* logBuilder(void) const {
     return m_logBuilder.get();
   }
 
+  /// @brief 设置日志构建器
   inline void setLogBuilder(const LogBuilderPtr& logBuilder) {
     m_logBuilder = logBuilder;
   }
 
+  /// @brief 检查指定级别是否启用
   inline bool enabled(Level level) const {
     return m_typedConfigurations->enabled(level);
   }
@@ -3682,55 +3705,66 @@ class SysLogInitializer {
 };
 #define ELPP_INITIALIZE_SYSLOG(id, opt, fac) el::SysLogInitializer elSyslogInit(id, opt, fac)
 /// @brief Static helpers for developers
+/// @brief 静态辅助类，提供各种日志相关的实用功能
 class Helpers : base::StaticClass {
  public:
-  /// @brief Shares logging repository (base::Storage)
+  /// @brief 共享日志存储库 (base::Storage)
   static inline void setStorage(base::type::StoragePointer storage) {
     ELPP = storage;
   }
-  /// @return Main storage repository
+
+  /// @return 主存储库
   static inline base::type::StoragePointer storage() {
     return ELPP;
   }
-  /// @brief Sets application arguments and figures out whats active for logging and whats not.
+
+  /// @brief 设置应用程序参数并确定日志记录的活动内容
   static inline void setArgs(int argc, char** argv) {
     ELPP->setApplicationArguments(argc, argv);
   }
+
   /// @copydoc setArgs(int argc, char** argv)
   static inline void setArgs(int argc, const char** argv) {
     ELPP->setApplicationArguments(argc, const_cast<char**>(argv));
   }
-  /// @brief Sets thread name for current thread. Requires std::thread
+
+  /// @brief 为当前线程设置线程名称。需要std::thread支持
   static inline void setThreadName(const std::string& name) {
     ELPP->setThreadName(name);
   }
+
   static inline std::string getThreadName() {
     return ELPP->getThreadName(base::threading::getCurrentThreadId());
   }
+
 #if defined(ELPP_FEATURE_ALL) || defined(ELPP_FEATURE_CRASH_LOG)
-  /// @brief Overrides default crash handler and installs custom handler.
-  /// @param crashHandler A functor with no return type that takes single int argument.
-  ///        Handler is a typedef with specification: void (*Handler)(int)
+  /// @brief 覆盖默认崩溃处理程序并安装自定义处理程序
+  /// @param crashHandler 一个没有返回类型且接受单个int参数的函数对象
+  ///        Handler是一个具有规范的typedef：void (*Handler)(int)
   static inline void setCrashHandler(const el::base::debug::CrashHandler::Handler& crashHandler) {
     el::elCrashHandler.setHandler(crashHandler);
   }
-  /// @brief Abort due to crash with signal in parameter
-  /// @param sig Crash signal
+
+  /// @brief 由于参数中的崩溃信号而中止
+  /// @param sig 崩溃信号
   static void crashAbort(int sig, const char* sourceFile = "", unsigned int long line = 0);
-  /// @brief Logs reason of crash as per sig
-  /// @param sig Crash signal
-  /// @param stackTraceIfAvailable Includes stack trace if available
-  /// @param level Logging level
-  /// @param logger Logger to use for logging
+
+  /// @brief 根据信号记录崩溃原因
+  /// @param sig 崩溃信号
+  /// @param stackTraceIfAvailable 如果可用则包括堆栈跟踪
+  /// @param level 日志级别
+  /// @param logger 用于日志记录的日志记录器
   static void logCrashReason(int sig, bool stackTraceIfAvailable = false,
                              Level level = Level::Fatal, const char* logger = base::consts::kDefaultLoggerId);
 #endif // defined(ELPP_FEATURE_ALL) || defined(ELPP_FEATURE_CRASH_LOG)
-  /// @brief Installs pre rollout callback, this callback is triggered when log file is about to be rolled out
-  ///        (can be useful for backing up)
+
+  /// @brief 安装预滚动回调，当日志文件即将滚动时触发此回调
+  ///        （可用于备份）
   static inline void installPreRollOutCallback(const PreRollOutCallback& callback) {
     ELPP->setPreRollOutCallback(callback);
   }
-  /// @brief Uninstalls pre rollout callback
+
+  /// @brief 卸载预滚动回调
   static inline void uninstallPreRollOutCallback(void) {
     ELPP->unsetPreRollOutCallback();
   }
@@ -3811,33 +3845,40 @@ class Helpers : base::StaticClass {
     logger->m_typedConfigurations->validateFileRolling(level, ELPP->preRollOutCallback());
   }
 };
-/// @brief Static helpers to deal with loggers and their configurations
+/// @brief 用于处理日志记录器及其配置的静态辅助类
 class Loggers : base::StaticClass {
  public:
-  /// @brief Gets existing or registers new logger
+  /// @brief 获取现有日志记录器或注册新日志记录器
   static Logger* getLogger(const std::string& identity, bool registerIfNotAvailable = true);
-  /// @brief Changes default log builder for future loggers
+
+  /// @brief 为将来的日志记录器更改默认日志构建器
   static void setDefaultLogBuilder(el::LogBuilderPtr& logBuilderPtr);
-  /// @brief Installs logger registration callback, this callback is triggered when new logger is registered
+
+  /// @brief 安装日志记录器注册回调，当注册新日志记录器时触发此回调
   template <typename T>
   static inline bool installLoggerRegistrationCallback(const std::string& id) {
     return ELPP->registeredLoggers()->installLoggerRegistrationCallback<T>(id);
   }
-  /// @brief Uninstalls log dispatch callback
+
+  /// @brief 卸载日志分发回调
   template <typename T>
   static inline void uninstallLoggerRegistrationCallback(const std::string& id) {
     ELPP->registeredLoggers()->uninstallLoggerRegistrationCallback<T>(id);
   }
+
   template <typename T>
   static inline T* loggerRegistrationCallback(const std::string& id) {
     return ELPP->registeredLoggers()->loggerRegistrationCallback<T>(id);
   }
-  /// @brief Unregisters logger - use it only when you know what you are doing, you may unregister
-  ///        loggers initialized / used by third-party libs.
+
+  /// @brief 注销日志记录器 - 仅在您知道自己在做什么时使用，您可能会注销
+  ///        由第三方库初始化/使用的日志记录器
   static bool unregisterLogger(const std::string& identity);
-  /// @brief Whether or not logger with id is registered
+
+  /// @brief 是否注册了具有指定ID的日志记录器
   static bool hasLogger(const std::string& identity);
-  /// @brief Reconfigures specified logger with new configurations
+
+  /// @brief 使用新配置重新配置指定的日志记录器
   static Logger* reconfigureLogger(Logger* logger, const Configurations& configurations);
   /// @brief Reconfigures logger with new configurations after looking it up using identity
   static Logger* reconfigureLogger(const std::string& identity, const Configurations& configurations);
