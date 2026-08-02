@@ -1,0 +1,33 @@
+{
+    "cmake.sourceDirectory": "${workspaceFolder}/HDR-ISP-main",
+    "cmake.buildDirectory": "${workspaceFolder}/HDR-ISP-main/build",
+    "cmake.configureOnOpen": true,
+    "cmake.preferredGenerators": [
+        "MinGW Makefiles",
+        "Unix Makefiles",
+        "Ninja",
+        "Visual Studio 17 2022"
+    ],
+    "cmake.generator": "MinGW Makefiles",
+    "cmake.buildArgs": [
+        "-j4"
+    ],
+    "cmake.configureArgs": [
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DCMAKE_C_COMPILER=d:/01-Work/01-tools/w64devkit/bin/gcc.exe",
+        "-DCMAKE_CXX_COMPILER=d:/01-Work/01-tools/w64devkit/bin/g++.exe",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+    ],
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "files.associations": {
+        "*.cpp": "cpp",
+        "*.h": "cpp",
+        "*.hpp": "cpp",
+        "CMakeLists.txt": "cmake"
+    },
+    "terminal.integrated.env.windows": {
+        "PATH": "${env:PATH}"
+    },
+    "cmake.autoSelectActiveFolder": false,
+    "cmake.showConfigurePayload": true
+}

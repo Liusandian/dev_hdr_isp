@@ -1,0 +1,95 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake: Configure",
+            "type": "shell",
+            "command": "d:/01-Work/01-tools/w64devkit/bin/cmake.exe",
+            "args": [
+                "-S",
+                "${workspaceFolder}/HDR-ISP-main",
+                "-B",
+                "${workspaceFolder}/HDR-ISP-main/build",
+                "-G",
+                "MinGW Makefiles",
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-DCMAKE_C_COMPILER=d:/01-Work/01-tools/w64devkit/bin/gcc.exe",
+                "-DCMAKE_CXX_COMPILER=d:/01-Work/01-tools/w64devkit/bin/g++.exe",
+                "-DBUILD_AI_ISP_MODULES=ON"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"],
+            "detail": "配置CMake项目"
+        },
+        {
+            "label": "CMake: Build Debug",
+            "type": "shell",
+            "command": "d:/01-Work/01-tools/w64devkit/bin/cmake.exe",
+            "args": [
+                "--build",
+                "${workspaceFolder}/HDR-ISP-main/build",
+                "--config",
+                "Debug",
+                "--",
+                "-j4"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "detail": "构建Debug版本"
+        },
+        {
+            "label": "CMake: Build HDR-ISP",
+            "type": "shell",
+            "command": "d:/01-Work/01-tools/w64devkit/bin/cmake.exe",
+            "args": [
+                "--build",
+                "${workspaceFolder}/HDR-ISP-main/build",
+                "--config",
+                "Debug",
+                "--target",
+                "HDR_ISP",
+                "--",
+                "-j4"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"],
+            "detail": "构建HDR-ISP目标"
+        },
+        {
+            "label": "CMake: Build AI ISP",
+            "type": "shell",
+            "command": "d:/01-Work/01-tools/w64devkit/bin/cmake.exe",
+            "args": [
+                "--build",
+                "${workspaceFolder}/HDR-ISP-main/build",
+                "--config",
+                "Debug",
+                "--target",
+                "ai_isp_test_exe",
+                "--",
+                "-j4"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"],
+            "detail": "构建AI ISP测试程序"
+        },
+        {
+            "label": "Run AI ISP Simple Test",
+            "type": "shell",
+            "command": "${workspaceFolder}/HDR-ISP-main/build/srcs/ai_isp_test_exe.exe",
+            "group": "test",
+            "problemMatcher": [],
+            "detail": "运行AI ISP简化测试程序"
+        },
+        {
+            "label": "Build and Run AI ISP",
+            "dependsOn": ["CMake: Build AI ISP"],
+            "group": "test",
+            "problemMatcher": [],
+            "detail": "构建并运行AI ISP测试"
+        }
+    ]
+}

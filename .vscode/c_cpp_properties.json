@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/HDR-ISP-main/**",
+                "${workspaceFolder}/HDR-ISP-main/thirdparty/easylog",
+                "${workspaceFolder}/HDR-ISP-main/thirdparty/easybmp",
+                "${workspaceFolder}/HDR-ISP-main/thirdparty/json/nlohmann",
+                "${workspaceFolder}/HDR-ISP-main/srcs/include",
+                "${workspaceFolder}/HDR-ISP-main/build"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "WIN32",
+                "_WINDOWS"
+            ],
+            "windowsSdkVersion": "10.0",
+            "compilerPath": "d:/01-Work/01-tools/w64devkit/bin/g++.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "windows-gcc-x64",
+            "compileCommands": "${workspaceFolder}/HDR-ISP-main/build/compile_commands.json"
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,51 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "HDR-ISP Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/HDR-ISP-main/build/HDR_ISP.exe",
+            "args": [
+                "${workspaceFolder}/HDR-ISP-main/cfgs/isp_config_cannon.json"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/HDR-ISP-main",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "CMake: Build HDR-ISP"
+        },
+        {
+            "name": "HDR-ISP Debug (DSC Config)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/HDR-ISP-main/build/HDR_ISP.exe",
+            "args": [
+                "${workspaceFolder}/HDR-ISP-main/cfgs/isp_config_dsc.json"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/HDR-ISP-main",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "CMake: Build HDR-ISP"
+        }
+    ]
+}

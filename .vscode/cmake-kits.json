@@ -1,0 +1,16 @@
+{
+    "version": 3,
+    "kits": [
+        {
+            "name": "MinGW GCC x86_64",
+            "compilers": {
+                "C": "d:/01-Work/01-tools/w64devkit/bin/gcc.exe",
+                "CXX": "d:/01-Work/01-tools/w64devkit/bin/g++.exe"
+            },
+            "environmentVariables": {
+                "PATH": "${env:PATH}"
+            },
+            "preferredGenerator": "MinGW Makefiles"
+        }
+    ]
+}
