@@ -599,28 +599,29 @@ class StaticClass {
   StaticClass& operator=(const StaticClass&);
 };
 }  // namespace base
-/// @brief Represents enumeration for severity level used to determine level of logging
+
+/// @brief 日志严重级别枚举，用于确定日志记录的级别
 ///
-/// @detail With Easylogging++, developers may disable or enable any level regardless of
-/// what the severity is. Or they can choose to log using hierarchical logging flag
+/// @detail 使用Easylogging++，开发人员可以启用或禁用任何级别，而不考虑其严重性。
+/// 也可以选择使用分层日志标志进行日志记录
 enum class Level : base::type::EnumType {
-  /// @brief Generic level that represents all the levels. Useful when setting global configuration for all levels
+  /// @brief 通用级别，表示所有级别。在为所有级别设置全局配置时很有用
   Global = 1,
-  /// @brief Information that can be useful to back-trace certain events - mostly useful than debug logs.
+  /// @brief 可用于回溯某些事件的信息 - 通常比调试日志更有用
   Trace = 2,
-  /// @brief Informational events most useful for developers to debug application
+  /// @brief 对开发人员调试应用程序最有用的信息性事件
   Debug = 4,
-  /// @brief Severe error information that will presumably abort application
+  /// @brief 严重错误信息，可能会导致应用程序中止
   Fatal = 8,
-  /// @brief Information representing errors in application but application will keep running
+  /// @brief 表示应用程序中的错误但应用程序将继续运行的信息
   Error = 16,
-  /// @brief Useful when application has potentially harmful situations
+  /// @brief 当应用程序具有潜在有害情况时使用
   Warning = 32,
-  /// @brief Information that can be highly useful and vary with verbose logging level.
+  /// @brief 可能非常有用且随详细日志级别变化的信息
   Verbose = 64,
-  /// @brief Mainly useful to represent current progress of application
+  /// @brief 主要用于表示应用程序的当前进度
   Info = 128,
-  /// @brief Represents unknown level
+  /// @brief 表示未知级别
   Unknown = 1010
 };
 } // namespace el
@@ -633,32 +634,32 @@ template<> struct hash<el::Level> {
 };
 }
 namespace el {
-/// @brief Static class that contains helper functions for el::Level
+/// @brief 包含el::Level辅助函数的静态类
 class LevelHelper : base::StaticClass {
  public:
-  /// @brief Represents minimum valid level. Useful when iterating through enum.
+  /// @brief 表示最小有效级别。在遍历枚举时有用
   static const base::type::EnumType kMinValid = static_cast<base::type::EnumType>(Level::Trace);
-  /// @brief Represents maximum valid level. This is used internally and you should not need it.
+  /// @brief 表示最大有效级别。这在内部使用，您通常不需要它
   static const base::type::EnumType kMaxValid = static_cast<base::type::EnumType>(Level::Info);
-  /// @brief Casts level to int, useful for iterating through enum.
+  /// @brief 将级别转换为int，在遍历枚举时有用
   static base::type::EnumType castToInt(Level level) {
     return static_cast<base::type::EnumType>(level);
   }
-  /// @brief Casts int(ushort) to level, useful for iterating through enum.
+  /// @brief 将int(ushort)转换为级别，在遍历枚举时有用
   static Level castFromInt(base::type::EnumType l) {
     return static_cast<Level>(l);
   }
-  /// @brief Converts level to associated const char*
-  /// @return Upper case string based level.
+  /// @brief 将级别转换为关联的const char*
+  /// @return 基于大写字符串的级别
   static const char* convertToString(Level level);
-  /// @brief Converts from levelStr to Level
-  /// @param levelStr Upper case string based level.
-  ///        Lower case is also valid but providing upper case is recommended.
+  /// @brief 从levelStr转换为Level
+  /// @param levelStr 基于大写字符串的级别
+  ///        小写也有效，但建议提供大写
   static Level convertFromString(const char* levelStr);
-  /// @brief Applies specified function to each level starting from startIndex
-  /// @param startIndex initial value to start the iteration from. This is passed as pointer and
-  ///        is left-shifted so this can be used inside function (fn) to represent current level.
-  /// @param fn function to apply with each level. This bool represent whether or not to stop iterating through levels.
+  /// @brief 从startIndex开始对每个级别应用指定函数
+  /// @param startIndex 开始迭代的初始值。这作为指针传递并被左移，
+  ///        因此可以在函数(fn)内部使用它来表示当前级别
+  /// @param fn 对每个级别应用的函数。此bool表示是否停止遍历级别
   static void forEachLevel(base::type::EnumType* startIndex, const std::function<bool(void)>& fn);
 };
 /// @brief Represents enumeration of ConfigurationType used to configure or access certain aspect

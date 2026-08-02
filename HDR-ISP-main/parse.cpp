@@ -217,14 +217,19 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
             isp_prm.y_gamma.curve[i] = gamma_curve[i];
         }
 
+        // 饱和度调整参数解析
         isp_prm.sat_prms.rotate_angle = j_root["saturation"]["rotate_angle"];
 
+        // 对比度调整参数解析
         isp_prm.contrast_prms.ratio = j_root["contrast"]["ratio"];
 
+        // 锐化处理参数解析
         isp_prm.sharpen_prms.ratio = j_root["sharpen"]["ratio"];
 
+        // 坏点校正（DPC）参数解析
         isp_prm.dpc_prms.thres = j_root["dpc"]["thres"];
 
+        // DPC模式解析：根据字符串选择坏点校正算法模式
         std::string dpc_mode =  j_root["dpc"]["mode"];
         if (dpc_mode == "mean") {
             isp_prm.dpc_prms.mode = DpcMode::MEAN;
@@ -232,6 +237,8 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
             isp_prm.dpc_prms.mode = DpcMode::GRADIENT;
         }
 
+        // 镜头阴影校正（LSC）参数解析
+        // 验证LSC网格尺寸是否符合预期配置
         if ((j_root["lsc"]["mesh_width_nums"] != kLscMeshPointHNums)
             || (j_root["lsc"]["mesh_height_nums"] != kLscMeshPointVNums)) {
             LOG(ERROR) << "lsc config prms error";
@@ -239,12 +246,14 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
         }
 
 
+        // 解析LSC网格数据数组
         auto lsc_data_arr = j_root["lsc"]["data"];
         if (lsc_data_arr.size() != kLscMeshPointVNums) {
             LOG(ERROR) << "lsc config lsc_data_arr error";
             return -1;
         }
 
+        // 存储LSC网格数据到四个颜色通道（B、Gr、Gb、R）
         for (int idy = 0; idy < kLscMeshPointVNums; ++idy) {
             auto arr = lsc_data_arr[idy];
             if (arr.size() != kLscMeshPointHNums) {
@@ -253,6 +262,7 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
             }
             for (int idx = 0; idx < kLscMeshPointHNums; ++idx) {
                 //first verison, use one prm
+                // 第一版本：所有颜色通道使用相同的校正值
                 isp_prm.lsc_prms.mesh_b[idy][idx] = arr[idx];
                 isp_prm.lsc_prms.mesh_gr[idy][idx] = arr[idx];
                 isp_prm.lsc_prms.mesh_gb[idy][idx] = arr[idx];
@@ -260,12 +270,13 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
             }
         }
     } catch (std::exception& e) {
+        // 捕获JSON解析过程中的异常并输出错误信息
         LOG(ERROR) << "parse failed " << e.what();
         fs.close();
         return -1;
     }
 
-
+    // 关闭配置文件并返回成功状态
     fs.close();
     LOG(INFO) << "parse exit";
     return 0;
