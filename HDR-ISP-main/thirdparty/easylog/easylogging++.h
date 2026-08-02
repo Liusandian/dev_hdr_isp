@@ -319,42 +319,55 @@ ELPP_INTERNAL_DEBUGGING_OUT_INFO << ELPP_INTERNAL_DEBUGGING_MSG(internalInfoStre
 // Keep following line commented until features are fixed
 #define ELPP_VARIADIC_TEMPLATES_SUPPORTED \
 (ELPP_COMPILER_GCC || ELPP_COMPILER_CLANG || ELPP_COMPILER_INTEL || (ELPP_COMPILER_MSVC && _MSC_VER >= 1800))
-// Logging Enable/Disable macros
+
+// ============================================================
+// 日志功能启用/禁用宏定义
+// ============================================================
+
+// 全局日志功能开关
 #if defined(ELPP_DISABLE_LOGS)
 #define ELPP_LOGGING_ENABLED 0
 #else
 #define ELPP_LOGGING_ENABLED 1
 #endif
+
+// 各级别日志的单独开关
 #if (!defined(ELPP_DISABLE_DEBUG_LOGS) && (ELPP_LOGGING_ENABLED))
 #  define ELPP_DEBUG_LOG 1
 #else
 #  define ELPP_DEBUG_LOG 0
 #endif  // (!defined(ELPP_DISABLE_DEBUG_LOGS) && (ELPP_LOGGING_ENABLED))
+
 #if (!defined(ELPP_DISABLE_INFO_LOGS) && (ELPP_LOGGING_ENABLED))
 #  define ELPP_INFO_LOG 1
 #else
 #  define ELPP_INFO_LOG 0
 #endif  // (!defined(ELPP_DISABLE_INFO_LOGS) && (ELPP_LOGGING_ENABLED))
+
 #if (!defined(ELPP_DISABLE_WARNING_LOGS) && (ELPP_LOGGING_ENABLED))
 #  define ELPP_WARNING_LOG 1
 #else
 #  define ELPP_WARNING_LOG 0
 #endif  // (!defined(ELPP_DISABLE_WARNING_LOGS) && (ELPP_LOGGING_ENABLED))
+
 #if (!defined(ELPP_DISABLE_ERROR_LOGS) && (ELPP_LOGGING_ENABLED))
 #  define ELPP_ERROR_LOG 1
 #else
 #  define ELPP_ERROR_LOG 0
 #endif  // (!defined(ELPP_DISABLE_ERROR_LOGS) && (ELPP_LOGGING_ENABLED))
+
 #if (!defined(ELPP_DISABLE_FATAL_LOGS) && (ELPP_LOGGING_ENABLED))
 #  define ELPP_FATAL_LOG 1
 #else
 #  define ELPP_FATAL_LOG 0
 #endif  // (!defined(ELPP_DISABLE_FATAL_LOGS) && (ELPP_LOGGING_ENABLED))
+
 #if (!defined(ELPP_DISABLE_TRACE_LOGS) && (ELPP_LOGGING_ENABLED))
 #  define ELPP_TRACE_LOG 1
 #else
 #  define ELPP_TRACE_LOG 0
 #endif  // (!defined(ELPP_DISABLE_TRACE_LOGS) && (ELPP_LOGGING_ENABLED))
+
 #if (!defined(ELPP_DISABLE_VERBOSE_LOGS) && (ELPP_LOGGING_ENABLED))
 #  define ELPP_VERBOSE_LOG 1
 #else

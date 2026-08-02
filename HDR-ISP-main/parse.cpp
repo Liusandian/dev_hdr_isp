@@ -182,21 +182,25 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
         isp_prm.ltm_prms.in_bits = j_root["ltm"]["in_bit"];
         isp_prm.ltm_prms.out_bits = j_root["ltm"]["out_bit"];
 
+        // RGB Gamma校正参数解析
         isp_prm.rgb_gamma.nums = j_root["rgbgamma"]["gammalut_nums"];
         isp_prm.rgb_gamma.in_bits = j_root["rgbgamma"]["in_bit"];
         isp_prm.rgb_gamma.out_bits = j_root["rgbgamma"]["out_bit"];
         auto gamma_curve = j_root["rgbgamma"]["gammalut"];
+        // 验证Gamma查找表的大小是否与配置数量匹配
         if (gamma_curve.size() != isp_prm.rgb_gamma.nums)
         {
             LOG(ERROR) << "rgb gamma input prms error";
             return -1;
         }
 
+        // 存储RGB Gamma校正曲线数据
         for (int i = 0; i < gamma_curve.size(); ++i)
         {
             isp_prm.rgb_gamma.curve[i] = gamma_curve[i];
         }
 
+        // 亮度（Y）Gamma校正参数解析
         isp_prm.y_gamma.nums = j_root["ygamma"]["gammalut_nums"];
         isp_prm.y_gamma.in_bits = j_root["ygamma"]["in_bit"];
         isp_prm.y_gamma.out_bits = j_root["ygamma"]["out_bit"];
@@ -207,6 +211,7 @@ int ParseIspCfgFile(const std::string cfg_file_path, IspPrms &isp_prm)
             return -1;
         }
 
+        // 存储亮度Gamma校正曲线数据
         for (int i = 0; i < gamma_curve.size(); ++i)
         {
             isp_prm.y_gamma.curve[i] = gamma_curve[i];
